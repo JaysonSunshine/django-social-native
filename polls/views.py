@@ -6,7 +6,7 @@ from elasticsearch import Elasticsearch
 
 # Create your views here.
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest,  HttpResponseNotFound
 
 
 def index(request):
@@ -26,11 +26,11 @@ def index(request):
 	m = pattern.match(raw_uri)
 
 	if not m:
-		pattern = re.compile("GET \/businesses.*")
-		if pattern.match(s):
-			print "400 error"
+		pattern = re.compile("/businesses.*")
+		if pattern.match(raw_uri):
+			return HttpResponseBadRequest(json.dumps({"error": "Invalid request"}))
 		else:
-			print "404 error"
+			return HttpResponseNotFound(json.dumps({"error": "Not found"}))
 
 	if m.group('query'):
 		query = m.group('query')
@@ -84,4 +84,4 @@ def index(request):
 	else:
 		return_dict['businesses'] = list()
 	
-	return HttpResponse(json.dumps(return_dict))
+	return HttpResponse(json.dumps(raw_uri, return_dict))
