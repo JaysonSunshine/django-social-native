@@ -10,36 +10,21 @@ from django.http import HttpResponse, HttpResponseBadRequest,  HttpResponseNotFo
 
 
 def index(request):
-	raw_uri = request.get_raw_uri()
+	if request.method != "GET":
+		return HttpResponseBadRequest(json.dumps({"error": "Invalid request"}))
 
-	offset = 0
-	size = 10
+	query = request.GET.get('q', '')
+	try:
+		offset = int(request.GET.get('offset', 0))
+		size = int(request.GET.get('size', 10))
+	except ValueError:
+		return HttpResponseBadRequest(json.dumps({"error": "Invalid request"}))
+
 	match_all = False
 
 	#with open("credentials") as f:
 	#	user_id, password = f.readlines()[0].split(',')
 	#	password = password.strip()
-
-	#s = raw_input('Input: ')
-
-	pattern = re.compile("http://localhost:8000/businesses\?q=(?P<query>.*?(?=&))(&offset=(?P<offset>[0-9]*))?(&size=(?P<size>[0-9]*))?")
-	m = pattern.match(raw_uri)
-
-	if not m:
-		pattern = re.compile("/businesses.*")
-		if pattern.match(raw_uri):
-			return HttpResponseBadRequest(json.dumps({"error": "Invalid request"}))
-		else:
-			return HttpResponseNotFound(json.dumps({"error": "Not found"}))
-
-	if m.group('query'):
-		query = m.group('query')
-	else:
-		query = None
-	if m.group('offset'):
-		offset = int(m.group('offset'))
-	if m.group('size'):
-		size = int(m.group('size'))
 
 	if query:
 		body = {"query": {"query_string": {"query": query, "fields": ['name', 'full_address']}}}
@@ -83,5 +68,5 @@ def index(request):
 		return_dict['businesses'] = return_dict['businesses'][offset * 10:size]
 	else:
 		return_dict['businesses'] = list()
-	
-	return HttpResponse(json.dumps(raw_uri, return_dict))
+
+	return HttpResponse(json.dumps(return_dict))

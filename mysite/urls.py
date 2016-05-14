@@ -16,26 +16,12 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib.auth.models import User
 from django.contrib import admin
-#from rest_framework import routers, serializers, viewsets
-'''
-# Serializers define the API representation.
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ('url', 'username', 'email', 'is_staff')
-
-# ViewSets define the view behavior.
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-# Routers provide an easy way of automatically determining the URL conf.
-router = rouzzster(r'users', UserViewSet)'''
+from . import views, non_existant_pages
 
 urlpatterns = [
-	url(r'^polls/', include('polls.urls')),
+	#url(r'^polls/', include('polls.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^', include('polls.urls')),
     url(r'^businesses', include('polls.urls')),
-    #url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
-]
+    url(r'^$', views.index),
+    url(r'^.*', non_existant_pages.index),
+    ]
